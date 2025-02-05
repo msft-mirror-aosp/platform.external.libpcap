@@ -20,18 +20,73 @@ license {
 cc_defaults {
     name: "libpcap_defaults",
     cflags: [
-        "-D_BSD_SOURCE",
         "-DHAVE_CONFIG_H",
-        "-Dlint",
+        "-D_BSD_SOURCE",
         "-D_U_=__attribute__((__unused__))",
+        "-Dlint",
         "-Wall",
         "-Werror",
+        "-Wno-implicit-function-declaration",
+        "-Wno-int-conversion",
         "-Wno-macro-redefined",
         "-Wno-pointer-arith",
         "-Wno-sign-compare",
+        "-Wno-tautological-compare",
         "-Wno-unused-parameter",
         "-Wno-unused-result",
-        "-Wno-tautological-compare",
+    ],
+}
+
+genrule {
+    name: "grammar.y",
+    cmd: "sed 's/@REENTRANT_PARSER@/%define api.pure/' $(in) > $(out)",
+    out: ["grammar.y"],
+    srcs: ["grammar.y.in"],
+}
+
+genrule {
+    name: "grammar.c",
+    cmd: "M4=$(location m4) $(location bison) -p pcap_ --no-lines --output=$(genDir)/grammar.c $(in)",
+    out: ["grammar.c"],
+    srcs: [":grammar.y"],
+    tools: [
+        "bison",
+        "m4",
+    ],
+}
+
+genrule {
+    name: "grammar.h",
+    // bison --defines outputs an extra file in addition to outputting the parser,
+    // so we still use --output to ensure the unused file is still in genDir.
+    cmd: "M4=$(location m4) $(location bison) -p pcap_ --no-lines --defines=$(genDir)/grammar.h --output=$(genDir)/unused $(in)",
+    out: ["grammar.h"],
+    srcs: [":grammar.y"],
+    tools: [
+        "bison",
+        "m4",
+    ],
+}
+
+genrule {
+    name: "scanner.c",
+    cmd: "M4=$(location m4) $(location flex) -P pcap_ -o $(genDir)/scanner.c $(in)",
+    out: ["scanner.c"],
+    srcs: ["scanner.l"],
+    tools: [
+        "flex",
+        "m4",
+    ],
+}
+
+genrule {
+    name: "scanner.h",
+    cmd: "M4=$(location m4) $(location flex) -P pcap_ --header-file=$(genDir)/scanner.h $(in)",
+    out: ["scanner.h"],
+    srcs: ["scanner.l"],
+    tools: [
+        "flex",
+        "m4",
     ],
 }
 
@@ -45,9 +100,14 @@ cc_library {
     // define a min_apex_sdk_version property that all module code can use.
     sdk_version: "29",
     defaults: ["libpcap_defaults"],
+    generated_headers: [
+        "grammar.h",
+        "scanner.h",
+    ],
 
-    // (Matches order in libpcap's Makefile.)
     srcs: [
+        ":grammar.c",
+        ":scanner.c",
         "bpf_dump.c",
         "bpf_filter.c",
         "bpf_image.c",
@@ -55,7 +115,6 @@ cc_library {
         "fad-getad.c",
         "fmtutils.c",
         "gencode.c",
-        "grammar.c",
         "nametoaddr.c",
         "optimize.c",
         "pcap-common.c",
@@ -65,7 +124,6 @@ cc_library {
         "pcap-util.c",
         "pcap.c",
         "savefile.c",
-        "scanner.c",
         "sf-pcap.c",
         "sf-pcapng.c",
     ],
