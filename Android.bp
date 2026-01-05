@@ -35,6 +35,19 @@ cc_defaults {
         "-Wno-unused-parameter",
         "-Wno-unused-result",
     ],
+
+    multilib: {
+        lib32: {
+            cflags: [
+                "-DSIZEOF_TIME_T=4",
+            ],
+        },
+        lib64: {
+            cflags: [
+                "-DSIZEOF_TIME_T=8",
+            ],
+        },
+    },
 }
 
 genrule {

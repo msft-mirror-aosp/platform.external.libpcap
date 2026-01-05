@@ -65,6 +65,7 @@ else
     run_after_echo rm -rf CMakeFiles/ CMakeCache.txt build/
     run_after_echo mkdir build
     run_after_echo cd build
+    run_after_echo cmake --version
     run_after_echo cmake ${CFLAGS:+-DEXTRA_CFLAGS="$CFLAGS"} \
         ${CMAKE_OPTIONS:+"$CMAKE_OPTIONS"} \
         -DCMAKE_INSTALL_PREFIX="$PREFIX" -DINET6="$IPV6" -DENABLE_REMOTE="$REMOTE" ..
@@ -93,9 +94,11 @@ run_after_echo "$PREFIX/bin/pcap-config" --additional-libs --static-pcap-only
 # VALGRIND_CMD is meant either to collapse or to expand.
 # shellcheck disable=SC2086
 if [ "$CMAKE" = no ]; then
+    run_after_echo $VALGRIND_CMD testprogs/versiontest
     run_after_echo $VALGRIND_CMD testprogs/findalldevstest
     [ "$TEST_RELEASETAR" = yes ] && run_after_echo "$MAKE_BIN" releasetar
 else
+    run_after_echo $VALGRIND_CMD run/versiontest
     run_after_echo $VALGRIND_CMD run/findalldevstest
 fi
 handle_matrix_debug
