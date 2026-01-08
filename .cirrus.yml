@@ -1,6 +1,7 @@
 # The internal git client reads CIRRUS_CLONE_DEPTH.
 env:
   CIRRUS_CLONE_DEPTH: 3
+  AUTOCONF_WARNINGS: no-obsolete
 
 freebsd_task:
   name: freebsd-amd64
@@ -8,7 +9,7 @@ freebsd_task:
   freebsd_instance:
     cpu: 1
     memory: 2G
-    image_family: freebsd-13-3
+    image_family: freebsd-13-5
   env:
     IGNORE_OSVERSION: yes
     MATRIX_CC: clang17 gcc13
@@ -21,7 +22,7 @@ linux_task:
   name: linux-amd64
   only_if: $CIRRUS_BRANCH != 'coverity_scan'
   container:
-    image: ubuntu:22.04
+    image: ubuntu:24.04
     cpu: 1
     memory: 1G
   env:
@@ -42,7 +43,7 @@ macos_task:
   name: macos-aarch64
   only_if: $CIRRUS_BRANCH != 'coverity_scan'
   macos_instance:
-    image: ghcr.io/cirruslabs/macos-ventura-xcode:14.1 # macOS 13 with Xcode 14.1
+    image: ghcr.io/cirruslabs/macos-runner:sonoma # last 3 versions of Xcode
   env:
     MAKEFLAGS: '-j 4' # macOS VMs run on 4 cores
   script:
@@ -54,7 +55,7 @@ coverity_task:
   name: Coverity Scan
   only_if: $CIRRUS_BRANCH == 'coverity_scan'
   container:
-    image: ubuntu:22.04
+    image: ubuntu:24.04
     cpu: 1
     memory: 2G
   env:
@@ -68,7 +69,7 @@ coverity_task:
     - apt-get -qy update >/dev/null
     - apt-get -qy install libdbus-1-dev libbluetooth-dev libnl-genl-3-dev libibverbs-dev libssl-dev >/dev/null
     - apt-get -qy install flex bison autoconf make gcc >/dev/null
-    - apt-get -qy install git curl wget ruby rubygems ruby-json >/dev/null # for the coverity script
+    - apt-get -qy install git curl wget ruby rubygems ruby-json file >/dev/null # for the coverity script
     - apt list --installed 'lib*-dev'
     - ./autogen.sh
     - ./.ci-coverity-scan-build.sh

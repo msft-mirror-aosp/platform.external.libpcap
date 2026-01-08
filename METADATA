@@ -7,17 +7,17 @@ description: "A system-independent interface for user-level packet capture."
 third_party {
   license_type: NOTICE
   security {
-    tag: "NVD-CPE2.3:cpe:/a:tcpdump:libpcap:-"
+    tag: "NVD-CPE2.3:cpe:/a:tcpdump:libpcap:1.10.6"
   }
   last_upgrade_date {
-    year: 2025
+    year: 2026
     month: 1
-    day: 9
+    day: 5
   }
   homepage: "https://www.tcpdump.org/"
   identifier {
     type: "Git"
     value: "https://github.com/the-tcpdump-group/libpcap.git"
-    version: "libpcap-1.10.5"
+    version: "libpcap-1.10.6"
   }
 }
